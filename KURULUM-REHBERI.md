@@ -95,6 +95,18 @@ Program açılır → Yargı Pro hesabınla giriş yap → hukuki sorunu yaz.
 
 ---
 
+## Hız hakkında — önemli (yavaş = bozuk DEĞİL!)
+
+Program, bilgisayarının gücüne göre **iki modelden birini otomatik seçer.** Güçlü bilgisayarlar büyük ve hızlı modeli; daha az güçlüler **küçük modeli** alır.
+
+- **Küçük modeli aldıysan cevaplar daha yavaş gelir — bu tamamen normaldir, program bozuk değildir.** (Teknik sebep: küçük model "yoğun" çalışır; büyük model aslında daha verimli/hızlıdır.)
+- **İlk soru her zaman en yavaşıdır** — program ilk soruda "ısınır", cevap birkaç dakika sürebilir. **Sonraki sorular belirgin daha hızlı** gelir.
+- Cevap yazılırken **bekle, kapatma.** Ekranda yazı akmaya / "düşünüyor" görünmeye başladıysa çalışıyor demektir.
+
+Yani "çok yavaş, çalışmıyor herhalde" deme — özellikle ilk soruda **sabret**. 🙂
+
+---
+
 ## Takılırsan
 
 - **Ekranda kırmızı bir yazı / hata görürsen** ya da bir şey çalışmazsa: **ekran görüntüsü al** (Windows: `Win + Shift + S`, Mac: `Cmd + Shift + 4`) ve yetkiliye gönder. Kurulum, olanları bir kayıt dosyasına da yazar; o dosyayı istersek göndermeni rica ederiz, gerisini biz hallederiz.

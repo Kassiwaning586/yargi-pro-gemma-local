@@ -36,8 +36,10 @@ Kurulum belleğe göre **modeli otomatik seçer**:
 | NVIDIA VRAM ≥ 16 GB **veya** Mac RAM ≥ 24 GB | **Gemma 4 26B-A4B** QAT UD-Q4_K_XL (~14.2 GB) |
 | Altında | **Gemma 4 12B** QAT UD-Q4_K_XL (~6.7 GB) |
 
+> ⚠️ **12B daha YAVAŞ üretir — bu normal, bozuk değil.** 12B *dense* (tüm parametreler aktif); 26B ise *MoE* (üretimde ~4B aktif) → 26B hem daha akıllı hem daha hızlı. Ölçüm: **26B ~72 tok/s, 12B ~32 tok/s.** Küçük donanımda 12B çalışıyorsa "yavaş = bozuk" sanma. Ayrıca **ilk istek** (soğuk prompt cache + büyük prefill) her zaman en yavaşıdır; sonraki sorular hızlanır.
+
 - **Windows:** herhangi bir NVIDIA kartı — derleme GPU mimarisini (`compute_cap`) `nvidia-smi`'den **otomatik** algılar (RTX 30/40/50, vb.).
-- **macOS:** Apple Silicon (M-serisi, Metal). ⚠️ Metal'de `turbo3` KV desteklenmezse: `CACHE_K=f16 CACHE_V=f16 ./scripts/start-server.sh`.
+- **macOS:** Apple Silicon (M-serisi, Metal). `turbo3` KV Metal'de **çalışıyor** (M1 Pro'da doğrulandı). Sorun olursa fallback: `CACHE_K=f16 CACHE_V=f16 ./scripts/start-server.sh`.
 - İlk kurulum uzun sürer (derleme + model indirme). `start-server` `models/`'daki gguf'u otomatik bulur.
 
 ## Donanım hedefi
