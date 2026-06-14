@@ -7,9 +7,11 @@ $repo = 'https://github.com/TheTom/llama-cpp-turboquant'
 if (-not (Test-Path $vendor)) {
     Write-Host "Klonlaniyor: $repo" -ForegroundColor Cyan
     git clone --depth 1 $repo $vendor
+    if ($LASTEXITCODE -ne 0) { throw "git clone basarisiz" }
 } else {
     Write-Host "Repo zaten var: $vendor (git pull)" -ForegroundColor Cyan
     git -C $vendor pull --ff-only
+    if ($LASTEXITCODE -ne 0) { throw "git pull basarisiz - repo durumunu kontrol edin" }
 }
 
 Push-Location $vendor

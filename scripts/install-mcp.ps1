@@ -1,5 +1,9 @@
 # Yargi Pro remote MCP'yi global opencode config'e ekler (resmi snippet).
 # Auth: ilk kullanimda opencode OAuth akisini yurutur (manuel token yok).
+$ErrorActionPreference = 'Stop'
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+    throw "node bulunamadi - Node.js kurun: https://nodejs.org/"
+}
 $node = @'
 const fs=require("fs"),os=require("os"),path=require("path");
 const dir=path.join(os.homedir(),".config","opencode"),file=path.join(dir,"opencode.json");
@@ -13,3 +17,5 @@ fs.writeFileSync(file,JSON.stringify(cfg,null,2)+"\n");
 console.log("yargi-mcp-pro eklendi -> "+file);
 '@
 $node | node -
+if ($LASTEXITCODE -ne 0) { throw "node calismasi basarisiz - MCP eklenemedi" }
+Write-Host "yargi-mcp-pro opencode global config'e eklendi." -ForegroundColor Green

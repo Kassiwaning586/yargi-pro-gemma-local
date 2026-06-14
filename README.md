@@ -56,5 +56,5 @@ opencode arayüzünden, **yerel** Gemma 4 26B QAT modeli (TheTom/llama-cpp-turbo
 ## Sorun giderme
 - **Derleme hatası:** `.\scripts\check-prereqs.ps1` çıktısındaki eksikleri kur. CUDA + MSVC C++ workload şart.
 - **Model yüklenmiyor / VRAM dolu:** `-Ngl` değerini düşür (örn. 80), `-Context`'i küçült.
-- **MCP OAuth takılırsa:** opencode'da tekrar dene; gerekirse `~/.local/share/opencode/mcp-auth.json` sil ve yeniden giriş yap.
+- **MCP OAuth takılırsa:** opencode'da tekrar dene; gerekirse Windows'ta `%USERPROFILE%\.local\share\opencode\mcp-auth.json` dosyasını sil ve yeniden giriş yap. (Global config: `%USERPROFILE%\.config\opencode\opencode.json`.)
 - **Tool-calling zayıfsa:** `--jinja` aktif olduğundan emin ol (start-server.ps1'de var).

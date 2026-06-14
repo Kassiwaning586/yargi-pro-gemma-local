@@ -18,6 +18,7 @@ if (-not $exe) { throw "llama-server.exe yok - once build-turboquant.ps1 calisti
 Write-Host "Baslatiliyor: $($exe.FullName)" -ForegroundColor Cyan
 Write-Host "Model: $model | Context: $Context | Ngl: $Ngl | Port: $Port" -ForegroundColor Cyan
 
+# Not: --cache-type-v turbo3, TheTom/llama-cpp-turboquant fork'una ozgudur; standart llama.cpp'de yoktur.
 & $exe.FullName `
     -m $model `
     -ngl $Ngl `

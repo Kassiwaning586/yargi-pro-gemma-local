@@ -13,6 +13,7 @@ Test-Tool 'git'    'git'    'https://git-scm.com/download/win'
 Test-Tool 'CMake'  'cmake'  'winget install Kitware.CMake veya https://cmake.org/download'
 Test-Tool 'CUDA (nvcc)' 'nvcc' 'CUDA Toolkit 12.x: https://developer.nvidia.com/cuda-downloads'
 Test-Tool 'Python' 'python' 'https://www.python.org/downloads/'
+Test-Tool 'Node.js' 'node' 'https://nodejs.org/'
 Test-Tool 'nvidia-smi' 'nvidia-smi' 'NVIDIA surucusu kurulu olmali'
 
 # MSVC C++ derleyici (cl.exe) - vswhere ile ara
