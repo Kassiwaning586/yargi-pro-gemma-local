@@ -41,10 +41,12 @@ Son kullanıcı makinesinde CUDA Toolkit, MSVC, CMake, derleme **yok**.
 ### 1. CI Build — `.github/workflows/build.yml`
 `workflow_dispatch` ile elle tetiklenir. 3 job:
 
-- **win-cuda** (`windows-latest`): MSVC önyüklü. `Jimver/cuda-toolkit` action ile **CUDA 12.x**
-  kurar (12.x = en geniş sürücü uyumu). `TheTom/llama-cpp-turboquant` klonla →
-  `cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES="75;80;86;89;90;120-real;120-virtual"
-  -DLLAMA_CURL=OFF` → `cmake --build build --config Release -j`. Sonra `build/bin/Release/`'tan
+- **win-cuda** (`windows-latest`): MSVC önyüklü. `Jimver/cuda-toolkit` action ile **CUDA 12.8**
+  kurar (sm_120/Blackwell için 12.8 şart; aynı zamanda 75/86/89'u da kapsar). `TheTom/llama-cpp-turboquant`
+  klonla → `cmake -B build -DGGML_CUDA=ON
+  -DCMAKE_CUDA_ARCHITECTURES="75-real;86-real;89-real;120-real;120-virtual" -DLLAMA_CURL=OFF`
+  → `cmake --build build --config Release -j`. (Arch listesi: RTX 20xx=75, 30xx=86, 40xx=89,
+  50xx=120; `120-virtual` PTX = ileri kartlar için JIT fallback.) Sonra `build/bin/Release/`'tan
   `llama-server.exe` + tüm `*.dll` (ggml*) + CUDA redist DLL'leri (`cudart64_12.dll`,
   `cublas64_12.dll`, `cublasLt64_12.dll`) tek klasöre toplanıp **zip**'lenir.
 - **mac-arm64** (`macos-14`): Metal yerleşik. Klonla → `cmake -B build -DGGML_METAL=ON -DLLAMA_CURL=OFF`
@@ -89,8 +91,9 @@ Ortak mantık: *`:8080` kapalıysa sunucuyu başlat (gizli) → hazır olunca op
 
 ### 5. Ön-kontroller (idiot-proof çekirdeği)
 - **Windows:** `nvidia-smi` var mı? Yoksa **dur** + anlaşılır mesaj: "Bu uygulama NVIDIA ekran kartı
-  gerektirir. Kartınız/sürücünüz görünmüyor." Sürücü sürümü: built-against CUDA 12.x için minimum
-  driver (~R525+); `nvidia-smi` CUDA sürümü < gerekliyse uyar.
+  gerektirir. Kartınız/sürücünüz görünmüyor." **Sürücü sürümü:** CUDA 12.8 ile build edildiği için
+  minimum NVIDIA sürücüsü **571.x** (Windows). `nvidia-smi --query-gpu=driver_version` < 571 ise
+  **dur** + "NVIDIA sürücünüzü güncelleyin (en az 571): https://www.nvidia.com/Download/index.aspx".
 - **macOS:** Apple Silicon mı (`uname -m` = arm64) / en az ne kadar RAM? Düşükse uyar ama devam et
   (12B'ye düşer).
 - **Disk:** hedef diskte ~20 GB boş yoksa **dur** + mesaj.
@@ -108,8 +111,8 @@ Ortak mantık: *`:8080` kapalıysa sunucuyu başlat (gizli) → hazır olunca op
 - choco/brew/npm adımları idempotent ([VAR] geç).
 
 ## Donanım kapsamı
-- **Windows:** CUDA arch listesi Turing→Blackwell (`75;80;86;89;90;120`) → tüm modern NVIDIA kartları,
-  tek binary. AMD/Intel GPU kapsam dışı.
+- **Windows:** RTX **20xx/30xx/40xx/50xx** (sm_75/86/89/120) → **tek binary** hepsini kapsar
+  (CUDA 12.8, sürücü ≥571). AMD/Intel GPU kapsam dışı.
 - **macOS:** Apple Silicon (arm64) birincil, Intel (x64) best-effort.
 
 ## Kapsam dışı (YAGNI)
@@ -122,7 +125,7 @@ Ortak mantık: *`:8080` kapalıysa sunucuyu başlat (gizli) → hazır olunca op
 ## Riskler ve azaltımlar
 | Risk | Azaltım |
 |---|---|
-| Sürücü built-against CUDA'yı desteklemiyor | CUDA **12.x** ile build (geniş uyum) + sürücü sürümü ön-kontrolü |
+| Sürücü built-against CUDA'yı desteklemiyor | CUDA **12.8** (20xx-50xx kapsar) + sürücü ≥571 ön-kontrolü, eskiyse "güncelle" mesajı |
 | CI'da CUDA build kırılır | Temiz runner zaten bunu erken yakalar; workflow loglari |
 | macOS Gatekeeper binary'yi engeller | `xattr -dr com.apple.quarantine` (script otomatik) |
 | Prebuilt DLL eksik → exe açılmaz | win-cuda job tüm ggml + cudart/cublas/cublasLt DLL'lerini paketler; CI'da smoke-load testi |
