@@ -9,6 +9,8 @@ Write-Host "huggingface_hub kuruluyor/guncelleniyor..." -ForegroundColor Cyan
 python -m pip install -U huggingface_hub hf_xet
 if ($LASTEXITCODE -ne 0) { throw "huggingface_hub kurulamadi" }
 
+# xet protokolu bazi aglarda takiliyor; standart HTTPS LFS indirmesine zorla.
+$env:HF_HUB_DISABLE_XET = '1'
 $env:YP_REPO = 'unsloth/gemma-4-26B-A4B-it-qat-GGUF'
 $env:YP_FILE = 'gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf'
 $env:YP_DIR  = $models
