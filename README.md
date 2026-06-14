@@ -101,5 +101,14 @@ Bitince sadece `.\scripts\start-server.ps1` çalıştırıp `opencode` aç. CUDA
 - **MCP OAuth takılırsa:** opencode'da tekrar dene; gerekirse Windows'ta `%USERPROFILE%\.local\share\opencode\mcp-auth.json` dosyasını sil ve yeniden giriş yap. (Global config: `%USERPROFILE%\.config\opencode\opencode.json`.)
 - **Tool-calling zayıfsa:** `--jinja` aktif olduğundan emin ol (start-server.ps1'de var).
 
-## Performans (RTX 4060 Ti 16 GB, ölçülen)
-- ~72 token/s üretim, **128K context** (K+V turbo3, -ngl 99), VRAM ~15.9/16 GB stabil. TurboQuant sayesinde 128K bağlam 16 GB'ye sığıyor; ama diğer GPU uygulamaları kapalı olmalı.
+## Performans (ölçülen — RTX 4060 Ti 16 GB, 128K context, K+V turbo3, -ngl 99)
+
+| Model | Aktif param | Hız | VRAM | Disk (GGUF) |
+|---|---|---|---|---|
+| **26B-A4B** QAT UD-Q4_K_XL (MoE) | ~4B | **~72 tok/s** | **~15.9 GB** | 13.3 GiB |
+| **12B** QAT UD-Q4_K_XL (dense) | 12B | **~32 tok/s** | **~8.7 GB** | 6.3 GiB |
+
+> İlginç: **26B, 12B'den hızlı** — çünkü 26B-A4B bir **MoE** modeli, üretimde yalnızca ~4B parametre aktif; 12B ise dense (tamamı aktif). Yani 26B hem daha akıllı hem daha hızlı, sadece daha çok VRAM ister.
+
+- 128K bağlam TurboQuant (turbo3 KV) sayesinde 16 GB'ye sığıyor; 26B'de VRAM çok dar (~15.9/16 GB) → **diğer GPU uygulamalarını kapat**. 12B'de bol headroom var (~8.7 GB), 12 GB'lik kartlara da uygun.
+- Hem 26B hem 12B doğru Türkçe hukuki cevap üretti; Yargı Pro MCP araç çağrıları (tool-calling) opencode'da çalışıyor.
