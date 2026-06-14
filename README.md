@@ -65,6 +65,12 @@ Bitince sadece `.\scripts\start-server.ps1` çalıştırıp `opencode` aç. CUDA
 
 ## Sorun giderme
 - **Derleme hatası:** `.\scripts\check-prereqs.ps1` çıktısındaki eksikleri kur. CUDA + MSVC C++ workload şart.
-- **Model yüklenmiyor / VRAM dolu:** `-Ngl` değerini düşür (örn. 80), `-Context`'i küçült.
+- **`CudaToolkitDir '' does not exist` (configure hatası):** CUDA env değişkenleri (`CUDA_PATH_V13_x`) o oturumda yok. Scriptler bunu otomatik tazeler; manuel derlerken yeni bir terminal aç.
+- **Model yüklenmiyor / VRAM dolu:** 16 GB'de model ~14 GB yer kaplar; **LM Studio, Chrome, oyun launcher'ları gibi GPU kullanan uygulamaları kapat** (VRAM'i paylaşıyorlar). Hâlâ sığmazsa `-Ngl` değerini düşür (örn. 80) veya `-Context`'i küçült.
+- **Cevap boş geliyor / sadece düşünüyor:** Gemma 4 "thinking" modu açık; önce akıl yürütür (reasoning), sonra cevap verir. Yeterli çıktı token'ı bırak (opencode.json `output: 8192`). Çok kısa `max_tokens` verirsen düşünme bitmeden limite takılır.
+- **İndirme 0 byte'ta takılıyor:** HF dosyayı xethub CDN'ine yönlendiriyor; script zaten `curl.exe` ile indiriyor (resume destekli — tekrar çalıştırırsan kaldığı yerden devam eder).
 - **MCP OAuth takılırsa:** opencode'da tekrar dene; gerekirse Windows'ta `%USERPROFILE%\.local\share\opencode\mcp-auth.json` dosyasını sil ve yeniden giriş yap. (Global config: `%USERPROFILE%\.config\opencode\opencode.json`.)
 - **Tool-calling zayıfsa:** `--jinja` aktif olduğundan emin ol (start-server.ps1'de var).
+
+## Performans (RTX 4060 Ti 16 GB, ölçülen)
+- ~70 token/s üretim, 8192 context. Model + turbo3 KV ~16 GB VRAM'i doldurur; daha büyük context için diğer GPU uygulamalarını kapat veya `-Ngl`'i düşür.
