@@ -41,7 +41,14 @@ Kurulumdan sonra **"Yargı Pro"** kısayolu oluşur (Windows masaüstü ve Başl
 | **opencode'u Aç** | opencode masaüstü uygulamasını açar |
 | **Çıkış** | Sunucuyu durdurur ve paneli kapatır |
 
-**Kullanım akışı:** İkona tıklayın → **Başlat** → ikon yeşile dönünce → **opencode'u Aç** → modeli `gemma-4-qat` seçin → ilk Yargı Pro aracında tarayıcıdan **OAuth** ile giriş yapın → hukuki sorunuzu yazın.
+**Kullanım akışı:** İkona tıklayın → **Başlat** → ikon yeşile dönünce → **opencode'u Aç**.
+
+### opencode içinde
+
+1. **Yeni proje/sohbet:** sol üstteki **+** işareti veya **Ctrl/Cmd + O**.
+2. **Model:** alttaki menüden **Gemma 4 QAT** (`gemma-4-qat`) seçin.
+3. **Yargı Pro girişi (MCP):** sağ üstteki **durum** butonu → **MCP** sekmesi → **yargi-mcp-pro** → **giriş yap**. Tarayıcıda **WorkOS OAuth** açılır; giriş yapıp opencode'a dönün (yalnızca ilk sefer).
+4. Artık Yargı Pro MCP ile yerel Gemma 4 modelini kullanarak sohbet edebilirsiniz.
 
 ## Otomatik model seçimi
 

@@ -79,11 +79,15 @@ Kurulum sonrası "Yargı Pro" küçük bir **kontrol panelidir** — asistanı b
 
 **2.** Bu küçük ikona **tıklayın** → açılan menüden **"Başlat"**a tıklayın. Asistan hazırlanır; bu **30 saniye – 1 dakika** sürebilir. Hazır olunca ikon **yeşile** döner.
 
-**3.** İkona tekrar tıklayın → **"opencode'u Aç"**. Yargı Pro programı açılır.
+**3.** İkona tekrar tıklayın → **"opencode'u Aç"**. Yargı Pro programı (opencode) açılır.
 
-**4.** İlk kullanımda tarayıcı açılıp **Yargı Pro hesabınızla giriş** yapmanızı isteyebilir; her zamanki gibi giriş yapın.
+**4. Yeni bir sohbet açın.** Sol üstteki **+ (artı)** işaretine tıklayın (ya da klavyeden Windows'ta **Ctrl + O**, Mac'te **Cmd + O**).
 
-**5.** Artık hukuki sorunuzu yazabilirsiniz. Örnek:
+**5. Modeli seçin.** Alttaki menüden **Gemma 4 QAT** modelini seçin. (Bu, bilgisayarınızda çalışan yerel asistandır.)
+
+**6. Yargı Pro'ya giriş yapın.** Sağ üstteki **durum** butonuna tıklayın → açılan yerde **MCP** sekmesine geçin → **yargi-mcp-pro**'ya tıklayıp **"giriş yap"** deyin. Tarayıcıda **Yargı Pro giriş sayfası (WorkOS)** açılır; hesabınızla giriş yapıp tekrar opencode'a dönün. (Bu girişi yalnızca ilk seferde yaparsınız.)
+
+**7. Sorun.** Artık Yargı Pro veritabanını yerel Gemma 4 modeliyle birlikte kullanarak sohbet edebilirsiniz. Örnek:
 > *"Kira tespiti davasında güncel bir Yargıtay kararı bulup özetler misiniz?"*
 
 **İşiniz bitince:** Köşedeki ikona tıklayıp **"Durdur"** (veya **"Çıkış"**) diyebilirsiniz.
