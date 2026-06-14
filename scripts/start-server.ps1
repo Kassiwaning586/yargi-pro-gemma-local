@@ -16,9 +16,10 @@ $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';'
 
 $root = Split-Path -Parent $PSScriptRoot
 $vendor = Join-Path $root 'vendor\llama-cpp-turboquant'
-$model = Join-Path $root 'models\gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf'
 
-if (-not (Test-Path $model)) { throw "Model yok: $model - once download-model.ps1 calistirin" }
+# models/ icindeki gguf'u otomatik bul (12B veya 26B - download-model.ps1 secer). Birden fazlaysa en buyugu.
+$model = (Get-ChildItem -Path (Join-Path $root 'models') -Filter '*.gguf' -ErrorAction SilentlyContinue | Sort-Object Length -Descending | Select-Object -First 1).FullName
+if (-not $model) { throw "models/ icinde .gguf yok - once download-model.ps1 calistirin" }
 
 $exe = Get-ChildItem -Path $vendor -Recurse -Filter 'llama-server.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $exe) { throw "llama-server.exe yok - once build-turboquant.ps1 calistirin" }

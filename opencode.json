@@ -8,10 +8,10 @@
         "baseURL": "http://127.0.0.1:8080/v1"
       },
       "models": {
-        "gemma-4-26b-qat": {
-          "name": "Gemma 4 26B QAT (turbo3, local)",
+        "gemma-4-qat": {
+          "name": "Gemma 4 QAT (local)",
           "limit": {
-            "context": 65536,
+            "context": 131072,
             "output": 8192
           }
         }

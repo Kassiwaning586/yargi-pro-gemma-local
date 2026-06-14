@@ -11,9 +11,10 @@ CK="${CACHE_K:-turbo3}"
 CV="${CACHE_V:-turbo3}"
 
 EXE="$ROOT/vendor/llama-cpp-turboquant/build/bin/llama-server"
-MODEL="$ROOT/models/gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf"
+# models/ icindeki gguf'u otomatik bul (12B veya 26B). Birden fazlaysa en buyugu.
+MODEL=$(ls -S "$ROOT"/models/*.gguf 2>/dev/null | head -1)
 
-[ -f "$MODEL" ] || { echo "Model yok: $MODEL - once download-model.sh"; exit 1; }
+[ -n "$MODEL" ] || { echo "models/ icinde .gguf yok - once download-model.sh"; exit 1; }
 [ -f "$EXE" ]   || { echo "llama-server yok: $EXE - once build-llamacpp.sh"; exit 1; }
 
 echo "Baslatiliyor: ctx=$CTX ngl=$NGL port=$PORT kv=$CK/$CV"

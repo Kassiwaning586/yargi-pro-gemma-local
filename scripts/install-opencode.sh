@@ -35,7 +35,7 @@ let cfg={};try{cfg=JSON.parse(fs.readFileSync(file,"utf8"))}catch{}
 if(typeof cfg!=="object"||cfg===null||Array.isArray(cfg))cfg={};
 if(!cfg["$schema"])cfg["$schema"]="https://opencode.ai/config.json";
 if(typeof cfg.provider!=="object"||cfg.provider===null)cfg.provider={};
-cfg.provider["llamacpp"]={npm:"@ai-sdk/openai-compatible",name:"llama-server (local)",options:{baseURL:"http://127.0.0.1:8080/v1"},models:{"gemma-4-26b-qat":{name:"Gemma 4 26B QAT (turbo3, local)",limit:{context:131072,output:8192}}}};
+cfg.provider["llamacpp"]={npm:"@ai-sdk/openai-compatible",name:"llama-server (local)",options:{baseURL:"http://127.0.0.1:8080/v1"},models:{"gemma-4-qat":{name:"Gemma 4 QAT (local)",limit:{context:131072,output:8192}}}};
 if(typeof cfg.mcp!=="object"||cfg.mcp===null)cfg.mcp={};
 cfg.mcp["yargi-mcp-pro"]={type:"remote",url:"https://yargi.betaspacestudio.com/mcp"};
 fs.writeFileSync(file,JSON.stringify(cfg,null,2)+"\n");

@@ -18,10 +18,17 @@ irm https://raw.githubusercontent.com/saidsurucu/yargi-pro-gemma-local/main/inst
 
 Gerisi otomatik: paket yöneticisi (Chocolatey/Homebrew) → CMake → CUDA(Win)/Metal(Mac) → TheTom fork derleme → model (~14 GB) → opencode CLI+desktop → MCP. Bitince Win'de `.\scripts\start-server.ps1`, Mac'te `./scripts/start-server.sh` çalıştır, opencode'u aç.
 
-### Desteklenen donanım
-- **Windows:** herhangi bir NVIDIA kartı — derleme GPU mimarisini (`compute_cap`) `nvidia-smi`'den **otomatik** algılar (RTX 30/40/50, vb.). ~16 GB VRAM önerilir (128K context için).
-- **macOS:** Apple Silicon (M-serisi, Metal). 24 GB+ unified memory önerilir. ⚠️ Metal'de `turbo3` KV desteklenmezse: `CACHE_K=f16 CACHE_V=f16 ./scripts/start-server.sh`.
-- İlk kurulum uzun sürer (derleme + 14 GB model indirme).
+### Desteklenen donanım + otomatik model seçimi
+Kurulum belleğe göre **modeli otomatik seçer**:
+
+| Donanım | Seçilen model |
+|---|---|
+| NVIDIA VRAM ≥ 16 GB **veya** Mac RAM ≥ 24 GB | **Gemma 4 26B-A4B** QAT UD-Q4_K_XL (~14.2 GB) |
+| Altında | **Gemma 4 12B** QAT UD-Q4_K_XL (~6.7 GB) |
+
+- **Windows:** herhangi bir NVIDIA kartı — derleme GPU mimarisini (`compute_cap`) `nvidia-smi`'den **otomatik** algılar (RTX 30/40/50, vb.).
+- **macOS:** Apple Silicon (M-serisi, Metal). ⚠️ Metal'de `turbo3` KV desteklenmezse: `CACHE_K=f16 CACHE_V=f16 ./scripts/start-server.sh`.
+- İlk kurulum uzun sürer (derleme + model indirme). `start-server` `models/`'daki gguf'u otomatik bulur.
 
 ## Donanım hedefi
 - GPU: NVIDIA RTX 4060 Ti 16 GB (CUDA, sm_89)
