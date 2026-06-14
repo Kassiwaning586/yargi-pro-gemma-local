@@ -7,7 +7,8 @@ permissions:
 
 jobs:
   win-cuda:
-    runs-on: windows-latest
+    # windows-2022 = VS 2022 (CUDA 12.8 resmi destekler). windows-latest VS 2026 tasiyor -> nvcc reddeder.
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - name: Install CUDA 12.8
