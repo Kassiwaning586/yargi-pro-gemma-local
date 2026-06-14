@@ -1,0 +1,59 @@
+name: build-binaries
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  win-cuda:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install CUDA 12.8
+        uses: Jimver/cuda-toolkit@v0.2.21
+        with:
+          cuda: '12.8.0'
+          method: network
+          sub-packages: '["nvcc","cudart","cublas","cublas_dev","visual_studio_integration"]'
+      - name: Build
+        shell: pwsh
+        run: ./scripts/ci-build-win.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: win-cuda
+          path: llama-turboquant-win-cuda.zip
+
+  mac-arm64:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/ci-build-mac.sh arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-arm64
+          path: llama-turboquant-mac-arm64.zip
+
+  mac-x64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash scripts/ci-build-mac.sh x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac-x64
+          path: llama-turboquant-mac-x64.zip
+
+  release:
+    needs: [win-cuda, mac-arm64, mac-x64]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: binaries-v1
+          name: Prebuilt binaries (binaries-v1)
+          files: dist/**/*.zip
