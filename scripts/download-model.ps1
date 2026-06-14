@@ -1,21 +1,33 @@
 # Gemma 4 26B-A4B QAT UD-Q4_K_XL GGUF dosyasini models/ klasorune indirir.
+# CLI yerine stabil huggingface_hub Python API'si (hf_hub_download) kullanilir.
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $models = Join-Path $root 'models'
-$repoId = 'unsloth/gemma-4-26B-A4B-it-qat-GGUF'
-$file = 'gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf'
-
 New-Item -ItemType Directory -Force -Path $models | Out-Null
 
 Write-Host "huggingface_hub kuruluyor/guncelleniyor..." -ForegroundColor Cyan
-python -m pip install -U "huggingface_hub[cli]"
+python -m pip install -U huggingface_hub hf_xet
 if ($LASTEXITCODE -ne 0) { throw "huggingface_hub kurulamadi" }
 
-Write-Host "Indiriliyor: $repoId / $file (~14.2 GB)" -ForegroundColor Cyan
-python -m huggingface_hub.commands.huggingface_cli download $repoId $file --local-dir $models
+$env:YP_REPO = 'unsloth/gemma-4-26B-A4B-it-qat-GGUF'
+$env:YP_FILE = 'gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf'
+$env:YP_DIR  = $models
+
+Write-Host "Indiriliyor: $($env:YP_REPO) / $($env:YP_FILE) (~14.2 GB)" -ForegroundColor Cyan
+$py = @'
+import os
+from huggingface_hub import hf_hub_download
+p = hf_hub_download(
+    repo_id=os.environ["YP_REPO"],
+    filename=os.environ["YP_FILE"],
+    local_dir=os.environ["YP_DIR"],
+)
+print("OK:", p)
+'@
+$py | python -
 if ($LASTEXITCODE -ne 0) { throw "Indirme basarisiz" }
 
-$target = Join-Path $models $file
+$target = Join-Path $models $env:YP_FILE
 if (Test-Path $target) {
     $gb = [math]::Round((Get-Item $target).Length/1GB,2)
     Write-Host "`nINDIRME TAMAM -> $target ($gb GB)" -ForegroundColor Green
