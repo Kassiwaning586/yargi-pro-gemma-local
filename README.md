@@ -2,6 +2,10 @@
 
 opencode arayüzünden, **yerel** Gemma 4 26B QAT modeli (TheTom/llama-cpp-turboquant + turbo3 KV) ve **Yargı Pro remote MCP** ile Türk hukuku araştırması.
 
+> 👩‍⚖️ **Avukat / teknik olmayan kullanıcı mısın?** Bu sayfayı okuma — adım adım, jargonsuz kurulum için **➡️ [KURULUM-REHBERI.md](KURULUM-REHBERI.md)**'ye git.
+>
+> ⬇️ Aşağısı **geliştiriciler / teknik kullanıcılar** içindir (mimari, CI, derleme, performans).
+
 ## ⚡ Tek satır kurulum
 
 **Windows (NVIDIA / CUDA)** — normal PowerShell, UAC'ye **Evet**:
