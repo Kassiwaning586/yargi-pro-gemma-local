@@ -22,10 +22,21 @@ if (-not (Test-Path $vendor)) {
     if ($LASTEXITCODE -ne 0) { throw "git pull basarisiz - repo durumunu kontrol edin" }
 }
 
+# GPU compute capability'yi otomatik tespit et (orn 8.9 -> 89). Bulunamazsa genis liste.
+$cc = $null
+try { $cc = (& nvidia-smi --query-gpu=compute_cap --format=csv,noheader 2>$null | Select-Object -First 1).Trim() } catch {}
+if ($cc -match '(\d+)\.(\d+)') {
+    $arch = "$($matches[1])$($matches[2])"
+    Write-Host "GPU compute capability: $cc -> CMAKE_CUDA_ARCHITECTURES=$arch" -ForegroundColor Cyan
+} else {
+    $arch = '75;80;86;89;90'  # tespit edilemedi: yaygin Turing/Ampere/Ada/Hopper
+    Write-Host "GPU mimarisi tespit edilemedi; genis liste: $arch" -ForegroundColor Yellow
+}
+
 Push-Location $vendor
 try {
-    Write-Host "CMake konfigurasyon (CUDA, sm_89)..." -ForegroundColor Cyan
-    cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=89 -DLLAMA_CURL=OFF
+    Write-Host "CMake konfigurasyon (CUDA, arch=$arch)..." -ForegroundColor Cyan
+    cmake -B build -DGGML_CUDA=ON "-DCMAKE_CUDA_ARCHITECTURES=$arch" -DLLAMA_CURL=OFF
     if ($LASTEXITCODE -ne 0) { throw "CMake configure basarisiz" }
 
     Write-Host "Derleniyor (Release)..." -ForegroundColor Cyan

@@ -1,0 +1,4 @@
+# Bash scriptleri her zaman LF (Mac/Linux'ta CRLF bash'i kirar)
+*.sh   text eol=lf
+# PowerShell scriptleri Windows'ta CRLF
+*.ps1  text eol=crlf

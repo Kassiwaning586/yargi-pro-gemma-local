@@ -2,21 +2,26 @@
 
 opencode arayüzünden, **yerel** Gemma 4 26B QAT modeli (TheTom/llama-cpp-turboquant + turbo3 KV) ve **Yargı Pro remote MCP** ile Türk hukuku araştırması.
 
-## ⚡ Tek satır kurulum (Windows)
+## ⚡ Tek satır kurulum
 
-Normal PowerShell'e yapıştır, UAC'ye **Evet** de — gerisi otomatik (Chocolatey, CMake, CUDA, derleme, model, opencode CLI+desktop, MCP):
+**Windows (NVIDIA / CUDA)** — normal PowerShell, UAC'ye **Evet**:
 
 ```powershell
 irm https://raw.githubusercontent.com/saidsurucu/yargi-pro-gemma-local/main/install.ps1 | iex
 ```
 
-cmd/bash içinden çalıştırmak için:
+**macOS (Apple Silicon / Metal)** — Terminal:
 
 ```bash
-powershell -NoProfile -ExecutionPolicy Bypass -Command "irm https://raw.githubusercontent.com/saidsurucu/yargi-pro-gemma-local/main/install.ps1 | iex"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/saidsurucu/yargi-pro-gemma-local/main/install.sh)"
 ```
 
-> İlk kurulum uzun sürer: CUDA Toolkit ~3 GB + derleme ~20-40 dk + model ~14 GB. Bitince `.\scripts\start-server.ps1` çalıştır, opencode'u aç.
+Gerisi otomatik: paket yöneticisi (Chocolatey/Homebrew) → CMake → CUDA(Win)/Metal(Mac) → TheTom fork derleme → model (~14 GB) → opencode CLI+desktop → MCP. Bitince Win'de `.\scripts\start-server.ps1`, Mac'te `./scripts/start-server.sh` çalıştır, opencode'u aç.
+
+### Desteklenen donanım
+- **Windows:** herhangi bir NVIDIA kartı — derleme GPU mimarisini (`compute_cap`) `nvidia-smi`'den **otomatik** algılar (RTX 30/40/50, vb.). ~16 GB VRAM önerilir (128K context için).
+- **macOS:** Apple Silicon (M-serisi, Metal). 24 GB+ unified memory önerilir. ⚠️ Metal'de `turbo3` KV desteklenmezse: `CACHE_K=f16 CACHE_V=f16 ./scripts/start-server.sh`.
+- İlk kurulum uzun sürer (derleme + 14 GB model indirme).
 
 ## Donanım hedefi
 - GPU: NVIDIA RTX 4060 Ti 16 GB (CUDA, sm_89)
