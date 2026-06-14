@@ -3,3 +3,5 @@ models/
 vendor/
 .env
 build/
+__pycache__/
+*.pyc
