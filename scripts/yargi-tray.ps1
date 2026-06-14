@@ -55,6 +55,13 @@ $sep2 = New-Object System.Windows.Forms.ToolStripSeparator
 $menu.Items.AddRange(@($miDurum, $sep1, $miBaslat, $miDurdur, $miAc, $sep2, $miCikis))
 $notify.ContextMenuStrip = $menu
 
+# Sol tikta da menu acilsin (sag tik zaten acar): NotifyIcon'un icsel ShowContextMenu'sunu cagir.
+$showMenu = $notify.GetType().GetMethod('ShowContextMenu', [System.Reflection.BindingFlags]'Instance,NonPublic')
+$notify.Add_MouseClick({
+    param($s, $e)
+    if ($e.Button -eq [System.Windows.Forms.MouseButtons]::Left) { $showMenu.Invoke($notify, $null) }
+})
+
 $appContext = New-Object System.Windows.Forms.ApplicationContext
 
 $miBaslat.Add_Click({
