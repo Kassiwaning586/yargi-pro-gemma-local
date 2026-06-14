@@ -21,7 +21,17 @@ opencode arayüzünden, **yerel** Gemma 4 26B QAT modeli (TheTom/llama-cpp-turbo
 - [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/) — "Desktop development with C++"
 - [Python 3.x](https://www.python.org/downloads/), [Node.js](https://nodejs.org/), [opencode](https://opencode.ai)
 
-## Kurulum (sırayla)
+## Hızlı kurulum (tek komut)
+
+Her şeyi (Chocolatey → CMake → CUDA Toolkit → derleme → model indirme → MCP) baştan sona kurar. Normal PowerShell'e yapıştır; UAC çıkınca **Evet** de (kendini yönetici olarak yeniden başlatır):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\saids\OneDrive\Belgeler\yargi-pro-gemma-local\scripts\setup-all.ps1"
+```
+
+Bitince sadece `.\scripts\start-server.ps1` çalıştırıp `opencode` aç. CUDA Toolkit ~3 GB + derleme ~20-40 dk + model ~14.2 GB olduğundan ilk kurulum uzun sürer. Adım adım yapmak istersen aşağıdaki manuel akışı kullan.
+
+## Kurulum (manuel, sırayla)
 
 > PowerShell'i repo kökünde aç. Scriptler engellenirse: `Set-ExecutionPolicy -Scope Process Bypass`
 
