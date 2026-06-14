@@ -15,8 +15,14 @@ echo "Prebuilt indiriliyor ($A)..."
 curl -L --retry 5 -o "$ZIP" "$URL"
 unzip -o "$ZIP" -d "$DEST"
 [ -f "$EXE" ] || { echo "binary acilmadi: $EXE"; exit 1; }
-# KRITIK: karantina temizle + arm64 icin ad-hoc imza (yoksa calismaz)
+# KRITIK 1: karantina temizle
 xattr -dr com.apple.quarantine "$DEST" 2>/dev/null || true
+# KRITIK 2: rpath. Binary CI build yolunu (@rpath) gomuyor; @loader_path ekle ki
+# yanindaki dylib'leri (libllama-common.dylib vb.) kendi klasoründe bulsun.
+for f in "$DEST"/llama-server "$DEST"/*.dylib; do
+  [ -f "$f" ] && install_name_tool -add_rpath @loader_path "$f" 2>/dev/null || true
+done
+# KRITIK 3: ad-hoc imza (install_name_tool imzayi bozar -> EN SON imzala; arm64 sart)
 find "$DEST" -type f \( -name 'llama-*' -o -name '*.dylib' \) -exec codesign --force --sign - {} \; 2>/dev/null || true
 chmod +x "$EXE"
 echo "Binary hazir -> $EXE"
