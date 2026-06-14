@@ -47,10 +47,7 @@ if (Test-Path (Join-Path $Dest '.git')) {
 
 # --- Tam kurulumu calistir (choco/cmake/cuda/build/model/opencode/mcp) ---
 Write-Host "[RUN] setup-all.ps1 calistiriliyor..." -ForegroundColor Cyan
-try {
-    & (Join-Path $Dest 'scripts\setup-all.ps1')
-} catch {
-    Write-Host "[HATA] Kurulum basarisiz: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "Log: $Dest\install.log" -ForegroundColor Yellow
-    Read-Host "Kapatmak icin Enter"
+& (Join-Path $Dest 'scripts\setup-all.ps1')
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[HATA] Kurulum tamamlanamadi. Log: $Dest\install.log" -ForegroundColor Red
 }

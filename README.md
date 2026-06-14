@@ -16,7 +16,7 @@ irm https://raw.githubusercontent.com/saidsurucu/yargi-pro-gemma-local/main/inst
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/saidsurucu/yargi-pro-gemma-local/main/install.sh)"
 ```
 
-Gerisi otomatik: paket yöneticisi (Chocolatey/Homebrew) → CMake → CUDA(Win)/Metal(Mac) → TheTom fork derleme → model (~14 GB) → opencode CLI+desktop → MCP. Bitince Win'de `.\scripts\start-server.ps1`, Mac'te `./scripts/start-server.sh` çalıştır, opencode'u aç.
+Gerisi otomatik: ön-kontrol → opencode CLI+desktop → **hazır binary indirme (derleme YOK)** → belleğe göre model → MCP config → tek-tık launcher. Bitince masaüstü (Win) / Launchpad (Mac) içindeki **"Yargı Pro"** kısayoluna çift tıkla — sunucuyu başlatır + opencode'u açar.
 
 ### Gereksinimler
 - **Windows:** NVIDIA kartı (RTX 20xx–50xx) + **sürücü ≥ 570.65** (installer kontrol eder), ~20 GB boş disk.
@@ -50,46 +50,22 @@ Kurulum belleğe göre **modeli otomatik seçer**:
 | KV cache | `--cache-type-v turbo3` |
 | MCP | `yargi-mcp-pro` → https://yargi.betaspacestudio.com/mcp (OAuth) |
 
-## Ön-koşullar
-- [git](https://git-scm.com/download/win), [CMake](https://cmake.org/download/), [CUDA Toolkit 12.x](https://developer.nvidia.com/cuda-downloads)
-- [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/) — "Desktop development with C++"
-- [Python 3.x](https://www.python.org/downloads/), [Node.js](https://nodejs.org/), [opencode](https://opencode.ai)
+## Geliştirici: kaynaktan derleme (opsiyonel)
 
-## Hızlı kurulum (tek komut)
-
-Her şeyi (Chocolatey → CMake → CUDA Toolkit → derleme → model indirme → MCP) baştan sona kurar. Normal PowerShell'e yapıştır; UAC çıkınca **Evet** de (kendini yönetici olarak yeniden başlatır):
+Normal kullanıcı **bunu yapmaz** — binary'ler GitHub Actions'ta derlenip Release'ten iner. Yalnızca geliştirme / özel derleme için. Gerekir: git, CMake, CUDA Toolkit 12.x + Visual Studio C++ Build Tools (Win) ya da Xcode CLT (Mac), Node.js.
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\saids\OneDrive\Belgeler\yargi-pro-gemma-local\scripts\setup-all.ps1"
-```
-
-Bitince sadece `.\scripts\start-server.ps1` çalıştırıp `opencode` aç. CUDA Toolkit ~3 GB + derleme ~20-40 dk + model ~14.2 GB olduğundan ilk kurulum uzun sürer. Adım adım yapmak istersen aşağıdaki manuel akışı kullan.
-
-## Kurulum (manuel, sırayla)
-
-> PowerShell'i repo kökünde aç. Scriptler engellenirse: `Set-ExecutionPolicy -Scope Process Bypass`
-
-```powershell
-# 1) On-kosul kontrolu
-.\scripts\check-prereqs.ps1
-
-# 2) Inference engine'i derle (~20-40 dk)
-.\scripts\build-turboquant.ps1
-
-# 3) Modeli indir (~14.2 GB)
+.\scripts\build-turboquant.ps1   # Windows: kaynaktan CUDA derleme (GPU mimarisi auto-detect)
 .\scripts\download-model.ps1
-
-# 4) Yargi Pro MCP'yi opencode'a ekle
-.\scripts\install-mcp.ps1
-
-# 5) Yerel modeli baslat (bu pencere acik kalsin)
 .\scripts\start-server.ps1
 ```
 
+CI binary'lerini yeniden üretmek: GitHub'da **build-binaries** workflow'unu çalıştır (`.github/workflows/build.yml`) → `binaries-v1` release'ini günceller.
+
 ## Kullanım
 
-1. Yeni bir terminalde repo kökünde `opencode` çalıştır (proje `opencode.json` otomatik okunur).
-2. Model seçiminde **`llamacpp / Gemma 4 26B QAT (turbo3, local)`** modelini seç.
+1. **"Yargı Pro"** kısayoluna çift tıkla (sunucu başlar + opencode açılır). Manuel: `.\scripts\start-server.ps1` sonra `opencode`.
+2. Model seçiminde **`llamacpp / Gemma 4 QAT (local)`** (`gemma-4-qat`) modelini seç.
 3. İlk Yargı Pro aracı çağrıldığında opencode **OAuth** akışını başlatır → tarayıcıdan Yargı Pro'ya giriş yap.
 4. Hukuki soru sor; model `yargi-mcp-pro` araçlarıyla karar/mevzuat getirir.
 

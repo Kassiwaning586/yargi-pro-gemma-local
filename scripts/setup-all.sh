@@ -16,7 +16,7 @@ step() {
 }
 
 step "On-kontroller" bash "$ROOT/scripts/preflight.sh"
-for pkg in git node; do command -v "$pkg" >/dev/null 2>&1 || brew install "$pkg"; done
+step "git/node kurulumu" bash -c 'for pkg in git node; do command -v "$pkg" >/dev/null 2>&1 || brew install "$pkg" || exit 1; done'
 step "opencode (CLI + desktop + config)" bash "$ROOT/scripts/install-opencode.sh"
 step "Prebuilt binary indirme" bash "$ROOT/scripts/get-binary.sh"
 step "Model indirme" bash "$ROOT/scripts/download-model.sh"
