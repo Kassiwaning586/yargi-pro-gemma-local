@@ -73,8 +73,12 @@ Binary'ler kod'dan ayrı, sabit bir tag'de tutulur: **`binaries-v1`**. Installer
 5. **Prebuilt binary'yi indir:** release'ten platforma uygun zip → `vendor/llama-cpp-turboquant/build/bin/`
    altına aç. (`build-turboquant.ps1`/`build-llamacpp.sh` artık son-kullanıcı yolundan çağrılmaz;
    yalnızca CI/geliştirici için repo'da kalır.)
-6. **(Yalnız Mac)** `xattr -dr com.apple.quarantine "<vendor binary klasoru>"` ve
-   `/Applications/Yargı Pro.app` üzerinde — indirilen binary Gatekeeper'a takılmasın.
+6. **(Yalnız Mac, ÖNEMLİ) iki adım:**
+   (a) `xattr -dr com.apple.quarantine "<vendor binary klasoru>"` + `/Applications/Yargı Pro.app` —
+   karantinayı temizle. (b) `codesign --force --deep --sign - "<llama-server binary>"` (+ gerekli `.dylib`'ler) —
+   **ad-hoc imza.** Apple Silicon (arm64) imzasız binary'yi karantina temizlense bile çalıştırmaz;
+   ad-hoc imza şart. (Alternatif: CI'da mac job'ı zip'lemeden önce ad-hoc imzalar; installer yine de
+   xattr çalıştırır.)
 7. **Model:** `download-model` (VRAM/RAM'e göre 26B veya 12B — mevcut mantık).
 8. **Config:** global provider + `yargi-mcp-pro` (mevcut `install-opencode`).
 9. **Launcher kur** (aşağıda).
@@ -92,8 +96,9 @@ Ortak mantık: *`:8080` kapalıysa sunucuyu başlat (gizli) → hazır olunca op
 ### 5. Ön-kontroller (idiot-proof çekirdeği)
 - **Windows:** `nvidia-smi` var mı? Yoksa **dur** + anlaşılır mesaj: "Bu uygulama NVIDIA ekran kartı
   gerektirir. Kartınız/sürücünüz görünmüyor." **Sürücü sürümü:** CUDA 12.8 ile build edildiği için
-  minimum NVIDIA sürücüsü **571.x** (Windows). `nvidia-smi --query-gpu=driver_version` < 571 ise
-  **dur** + "NVIDIA sürücünüzü güncelleyin (en az 571): https://www.nvidia.com/Download/index.aspx".
+  minimum NVIDIA sürücüsü **570.65** (Windows; CUDA 12.8 floor — doğrulandı). `nvidia-smi
+  --query-gpu=driver_version` < 570.65 ise **dur** + "NVIDIA sürücünüzü güncelleyin (en az 570.65):
+  https://www.nvidia.com/Download/index.aspx".
 - **macOS:** Apple Silicon mı (`uname -m` = arm64) / en az ne kadar RAM? Düşükse uyar ama devam et
   (12B'ye düşer).
 - **Disk:** hedef diskte ~20 GB boş yoksa **dur** + mesaj.
@@ -112,12 +117,12 @@ Ortak mantık: *`:8080` kapalıysa sunucuyu başlat (gizli) → hazır olunca op
 
 ## Donanım kapsamı
 - **Windows:** RTX **20xx/30xx/40xx/50xx** (sm_75/86/89/120) → **tek binary** hepsini kapsar
-  (CUDA 12.8, sürücü ≥571). AMD/Intel GPU kapsam dışı.
+  (CUDA 12.8, sürücü ≥570.65). AMD/Intel GPU kapsam dışı.
 - **macOS:** Apple Silicon (arm64) birincil, Intel (x64) best-effort.
 
 ## Kapsam dışı (YAGNI)
 - Windows servis/otomatik-başlatma (launcher tek-tık yeterli; B seçeneği reddedildi).
-- macOS imza/notarization (xattr ile çözülüyor; ücretli Apple hesabı gerekmez).
+- macOS Apple **notarization** / ücretli Developer imzası (gerekmez — lokal **ad-hoc** `codesign --sign -` + xattr yeterli).
 - AMD/Intel GPU, Linux.
 - Model'i installer'a gömme (14 GB; indirme doğru granülarite).
 - Otomatik fork-güncelleme tetikleme (elle workflow_dispatch yeterli).
@@ -125,9 +130,9 @@ Ortak mantık: *`:8080` kapalıysa sunucuyu başlat (gizli) → hazır olunca op
 ## Riskler ve azaltımlar
 | Risk | Azaltım |
 |---|---|
-| Sürücü built-against CUDA'yı desteklemiyor | CUDA **12.8** (20xx-50xx kapsar) + sürücü ≥571 ön-kontrolü, eskiyse "güncelle" mesajı |
+| Sürücü built-against CUDA'yı desteklemiyor | CUDA **12.8** (20xx-50xx kapsar) + sürücü ≥570.65 ön-kontrolü, eskiyse "güncelle" mesajı |
 | CI'da CUDA build kırılır | Temiz runner zaten bunu erken yakalar; workflow loglari |
-| macOS Gatekeeper binary'yi engeller | `xattr -dr com.apple.quarantine` (script otomatik) |
+| macOS Gatekeeper/arm64 imzasız binary'yi engeller | `xattr -dr com.apple.quarantine` **+ ad-hoc** `codesign --force --deep --sign -` (Apple Silicon'da imza şart; script otomatik) |
 | Prebuilt DLL eksik → exe açılmaz | win-cuda job tüm ggml + cudart/cublas/cublasLt DLL'lerini paketler; CI'da smoke-load testi |
 | SmartScreen opencode/desktop exe'yi uyarır | README'de not; imzasız beklenir |
 
