@@ -23,6 +23,13 @@ else
 fi
 
 URL="https://huggingface.co/$REPO/resolve/main/$FILE"
+
+# Zaten tam indirilmisse atla.
+if [ -f "$MODELS/$FILE" ] && [ "$(stat -f%z "$MODELS/$FILE" 2>/dev/null || stat -c%s "$MODELS/$FILE")" -ge "$EXPECTED" ]; then
+  echo "[VAR] Model zaten tam indirilmis, atlaniyor -> $MODELS/$FILE"
+  exit 0
+fi
+
 echo "Indiriliyor: $FILE (~$((EXPECTED/1024/1024/1024)) GB)"
 curl -L -C - --retry 8 --retry-delay 5 --retry-all-errors -o "$MODELS/$FILE" "$URL"
 

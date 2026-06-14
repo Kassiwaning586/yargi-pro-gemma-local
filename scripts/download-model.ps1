@@ -25,6 +25,13 @@ if ($vram -ge 16000) {
 
 $url = "https://huggingface.co/$repo/resolve/main/$file"
 $target = Join-Path $models $file
+
+# Zaten tam indirilmisse atla (curl -C - tam dosyada 416 verip throw etmesin).
+if ((Test-Path $target) -and ((Get-Item $target).Length -ge $expected)) {
+    Write-Host "[VAR] Model zaten tam indirilmis, atlaniyor -> $target" -ForegroundColor Green
+    return
+}
+
 Write-Host "Indiriliyor: $file`nHedef: $target`n"
 
 curl.exe -L -C - --retry 8 --retry-delay 5 --retry-all-errors -o "$target" "$url"
