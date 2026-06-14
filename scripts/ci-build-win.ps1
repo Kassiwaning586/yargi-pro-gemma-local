@@ -10,16 +10,18 @@ Write-Host "CUDA_PATH=$env:CUDA_PATH"
 git clone --depth 1 $repo $src
 if ($LASTEXITCODE -ne 0) { throw "clone basarisiz" }
 
-cmake -S $src -B "$src/build" -DGGML_CUDA=ON `
+# Ninja generator: nvcc'yi dogrudan kullanir, VS CUDA entegrasyonuna (No CUDA toolset) takilmaz.
+# Onkosul: msvc-dev-cmd ile cl.exe ortamda + Ninja PATH'te.
+cmake -S $src -B "$src/build" -G Ninja -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON `
   "-DCMAKE_CUDA_ARCHITECTURES=75-real;86-real;89-real;120-real;120-virtual" `
   -DLLAMA_CURL=OFF
 if ($LASTEXITCODE -ne 0) { throw "configure basarisiz" }
-cmake --build "$src/build" --config Release -j
+cmake --build "$src/build" -j
 if ($LASTEXITCODE -ne 0) { throw "build basarisiz" }
 
 New-Item -ItemType Directory -Force -Path $stage | Out-Null
-# llama-server.exe + build'in urettigi tum DLL'ler (ggml*, llama*)
-$bin = "$src/build/bin/Release"
+# llama-server.exe + build'in urettigi tum DLL'ler (ggml*, llama*). Ninja: bin/ (Release alt-klasor yok).
+$bin = "$src/build/bin"
 Get-ChildItem $bin -Recurse -Include 'llama-server.exe','*.dll' | Copy-Item -Destination $stage -Force
 # CUDA redist DLL'leri (toolkit olmadan calismasi icin sart)
 $cudaBin = Join-Path $env:CUDA_PATH 'bin'

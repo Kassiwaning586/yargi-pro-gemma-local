@@ -15,7 +15,11 @@ jobs:
         with:
           cuda: '12.8.0'
           method: network
-          sub-packages: '["nvcc","cudart","cublas","cublas_dev","visual_studio_integration"]'
+          sub-packages: '["nvcc","cudart","cublas","cublas_dev"]'
+      - name: Install Ninja
+        run: choco install ninja -y --no-progress
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
       - name: Build
         shell: pwsh
         run: ./scripts/ci-build-win.ps1
