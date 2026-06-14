@@ -31,4 +31,7 @@ else
 fi
 
 # --- Tam kurulum ---
-bash "$DEST/scripts/setup-all.sh"
+if ! bash "$DEST/scripts/setup-all.sh"; then
+  echo "[HATA] Kurulum basarisiz. Log: $DEST/install.log"
+  read -r -p "Kapatmak icin Enter" _
+fi
