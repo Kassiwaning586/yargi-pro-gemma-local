@@ -10,10 +10,10 @@ $root = Split-Path -Parent $PSScriptRoot
 $vendor = Join-Path $root 'vendor\llama-cpp-turboquant'
 $model = Join-Path $root 'models\gemma-4-26B-A4B-it-qat-UD-Q4_K_XL.gguf'
 
-if (-not (Test-Path $model)) { throw "Model yok: $model — once download-model.ps1 calistirin" }
+if (-not (Test-Path $model)) { throw "Model yok: $model - once download-model.ps1 calistirin" }
 
 $exe = Get-ChildItem -Path $vendor -Recurse -Filter 'llama-server.exe' -ErrorAction SilentlyContinue | Select-Object -First 1
-if (-not $exe) { throw "llama-server.exe yok — once build-turboquant.ps1 calistirin" }
+if (-not $exe) { throw "llama-server.exe yok - once build-turboquant.ps1 calistirin" }
 
 Write-Host "Baslatiliyor: $($exe.FullName)" -ForegroundColor Cyan
 Write-Host "Model: $model | Context: $Context | Ngl: $Ngl | Port: $Port" -ForegroundColor Cyan

@@ -8,14 +8,14 @@ function Test-Tool($name, $cmd, $hint) {
     else { Write-Host "[EKSIK] $name -> $hint" -ForegroundColor Red; $script:ok = $false }
 }
 
-Write-Host "=== Yargi Pro Local — On-kosul kontrolu ===`n"
+Write-Host "=== Yargi Pro Local - On-kosul kontrolu ===`n"
 Test-Tool 'git'    'git'    'https://git-scm.com/download/win'
 Test-Tool 'CMake'  'cmake'  'winget install Kitware.CMake veya https://cmake.org/download'
 Test-Tool 'CUDA (nvcc)' 'nvcc' 'CUDA Toolkit 12.x: https://developer.nvidia.com/cuda-downloads'
 Test-Tool 'Python' 'python' 'https://www.python.org/downloads/'
 Test-Tool 'nvidia-smi' 'nvidia-smi' 'NVIDIA surucusu kurulu olmali'
 
-# MSVC C++ derleyici (cl.exe) — vswhere ile ara
+# MSVC C++ derleyici (cl.exe) - vswhere ile ara
 $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 if (Test-Path $vswhere) {
     $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
