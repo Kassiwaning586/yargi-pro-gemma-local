@@ -17,6 +17,13 @@ function Test-Server {
     } catch { return $false }
 }
 
+function Stop-LlamaServer {
+    # Native Windows surecini kapat
+    Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force
+    # WSL icinde calisiyorsa onu da kapat (WSL yoksa sessizce gecer)
+    Start-Process wsl -ArgumentList '-e','pkill','-f','llama-server' -WindowStyle Hidden -ErrorAction SilentlyContinue
+}
+
 function New-DotIcon([System.Drawing.Color]$color) {
     $bmp = New-Object System.Drawing.Bitmap 16,16
     $g = [System.Drawing.Graphics]::FromImage($bmp)
@@ -57,10 +64,10 @@ $miBaslat.Add_Click({
         $notify.ShowBalloonTip(3000, 'Yargi Pro', 'Sunucu baslatiliyor (model yuklenirken biraz bekleyin)...', 'Info')
     }
 })
-$miDurdur.Add_Click({ Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force })
+$miDurdur.Add_Click({ Stop-LlamaServer })
 $miAc.Add_Click({ if (Test-Path $ocExe) { Start-Process $ocExe } else { Start-Process 'opencode' } })
 $miCikis.Add_Click({
-    Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force
+    Stop-LlamaServer
     $notify.Visible = $false
     $notify.Dispose()
     $appContext.ExitThread()
