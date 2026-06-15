@@ -6,7 +6,6 @@ $root   = Split-Path -Parent $PSScriptRoot
 $model  = (Get-ChildItem -Path (Join-Path $root 'models') -Filter '*.gguf' | Sort-Object Length -Descending | Select-Object -First 1).FullName
 $exe    = (Get-ChildItem -Path (Join-Path $root 'vendor\llama-cpp-turboquant') -Recurse -Filter 'llama-server.exe' | Select-Object -First 1).FullName
 $port   = 8099
-$ctx    = 4096
 $logDir = Join-Path $root 'logs'; New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 
 if (-not $model) { throw "model bulunamadi" }
@@ -22,11 +21,14 @@ Start-Sleep -Seconds 2
 # Sabit ~1200 token'lik prompt (her config icin ayni -> adil karsilastirma).
 $prompt = ("Turk hukuku, yargi kararlari ve mevzuat hakkinda detayli bir analiz metni yaziyoruz. " * 120)
 
-# Test edilecek konfigurasyonlar
+# Hepsi turbo3 (kazanan). Degisen: context (-c) ve parallel slot sayisi (--parallel).
+# Amac: yavaslik buyuk context'ten mi yoksa n_parallel=4'ten mi geliyor izole etmek.
+$kv = @('--cache-type-k','turbo3','--cache-type-v','turbo3')
 $configs = @(
-    @{ name = 'turbo3 (mevcut varsayilan)'; extra = @('--cache-type-k','turbo3','--cache-type-v','turbo3') }
-    @{ name = 'f16 KV';                      extra = @('--cache-type-k','f16','--cache-type-v','f16') }
-    @{ name = 'turbo3 + buyuk batch (ub2048)'; extra = @('--cache-type-k','turbo3','--cache-type-v','turbo3','-b','2048','-ub','2048') }
+    @{ name = 'c8192   np1'; extra = $kv + @('-c','8192','--parallel','1') }
+    @{ name = 'c32768  np1'; extra = $kv + @('-c','32768','--parallel','1') }
+    @{ name = 'c131072 np1'; extra = $kv + @('-c','131072','--parallel','1') }
+    @{ name = 'c131072 np4 (gercek/mevcut)'; extra = $kv + @('-c','131072','--parallel','4') }
 )
 
 function Wait-Ready($port, $timeoutSec) {
@@ -53,7 +55,7 @@ $results = @()
 foreach ($cfg in $configs) {
     Write-Host "=== $($cfg.name) ===" -ForegroundColor Yellow
     $errLog = Join-Path $logDir ("bench-" + ($cfg.name -replace '[^a-zA-Z0-9]','_') + ".log")
-    $argList = @('-m',$model,'-ngl','99','-fa','on','-c',$ctx,'--host','127.0.0.1','--port',$port,'--no-warmup') + $cfg.extra
+    $argList = @('-m',$model,'-ngl','99','-fa','on','--host','127.0.0.1','--port',$port,'--no-warmup') + $cfg.extra
     $p = Start-Process -FilePath $exe -ArgumentList $argList -PassThru -NoNewWindow `
             -RedirectStandardOutput $errLog -RedirectStandardError "$errLog.err"
     try {
@@ -71,4 +73,6 @@ foreach ($cfg in $configs) {
 
 Write-Host "`n===== SONUC =====" -ForegroundColor Cyan
 $results | Format-Table -AutoSize
-Write-Host "`nBu tabloyu paylas. (Prefill turbo3'te dusuk, f16'da yuksekse -> suclu turbo3 KV / Blackwell cekirdekleri.)" -ForegroundColor Cyan
+Write-Host "`nBu tabloyu paylas. Yorum:" -ForegroundColor Cyan
+Write-Host "  - c8192/c32768 hizli ama c131072 yavassa -> suclu BUYUK CONTEXT (context'i dusururuz)." -ForegroundColor Cyan
+Write-Host "  - c131072 np1 hizli ama np4 yavassa -> suclu N_PARALLEL (start-server'a --parallel 1 ekleriz, context kalir)." -ForegroundColor Cyan
