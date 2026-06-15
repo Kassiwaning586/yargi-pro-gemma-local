@@ -37,14 +37,45 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
 }
 
-# --- Repo'yu klonla / guncelle ---
-if (Test-Path (Join-Path $Dest '.git')) {
-    Write-Host "[GIT] Repo guncelleniyor: $Dest" -ForegroundColor Cyan
-    git -C $Dest pull --ff-only
-} else {
-    Write-Host "[GIT] Klonlaniyor: $RepoUrl -> $Dest" -ForegroundColor Cyan
-    git clone $RepoUrl $Dest
-    if ($LASTEXITCODE -ne 0) { throw "git clone basarisiz" }
+# --- Repo'yu HER ZAMAN temiz klonla. Var olan kopya silinir; ancak indirilen
+#     agir dosyalar (model + vendor binary, ikisi de .gitignore'da) korunup
+#     klon sonrasi geri tasinir; boylece kod hep taze gelir, 14 GB tekrar inmez. ---
+$keep = Join-Path (Split-Path -Parent $Dest) '.yargi-keep'
+$keepSubs = @('models', 'vendor')
+
+if (Test-Path $Dest) {
+    # Calisan sunucu vendor/model dosyalarini kilitler; once kapat.
+    Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force
+    New-Item -ItemType Directory -Force -Path $keep | Out-Null
+    foreach ($sub in $keepSubs) {
+        $src = Join-Path $Dest $sub
+        $bak = Join-Path $keep $sub
+        # Sadece $Dest'te varsa VE daha once yedeklenmemisse kenara al (yarim kalmis run'da modeli ezme).
+        if ((Test-Path $src) -and -not (Test-Path $bak)) {
+            Write-Host "[GIT] Korunuyor (gecici kenara aliniyor): $sub" -ForegroundColor Cyan
+            Move-Item -Path $src -Destination $bak -Force
+        }
+    }
+    Write-Host "[GIT] Var olan klasor siliniyor: $Dest" -ForegroundColor Yellow
+    Remove-Item -Recurse -Force $Dest
+}
+
+Write-Host "[GIT] Temiz klonlaniyor: $RepoUrl -> $Dest" -ForegroundColor Cyan
+git clone $RepoUrl $Dest
+if ($LASTEXITCODE -ne 0) { throw "git clone basarisiz" }
+
+# Korunan agir dosyalari geri tasi.
+if (Test-Path $keep) {
+    foreach ($sub in $keepSubs) {
+        $bak = Join-Path $keep $sub
+        if (Test-Path $bak) {
+            Write-Host "[GIT] Geri tasiniyor: $sub" -ForegroundColor Cyan
+            $dst = Join-Path $Dest $sub
+            if (Test-Path $dst) { Remove-Item -Recurse -Force $dst }
+            Move-Item -Path $bak -Destination $dst -Force
+        }
+    }
+    Remove-Item -Recurse -Force $keep
 }
 
 # --- Tam kurulumu calistir (choco/cmake/cuda/build/model/opencode/mcp) ---
