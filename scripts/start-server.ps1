@@ -34,6 +34,9 @@ Write-Host "Log: $serverLog (crash olursa bu dosyayi gonderin)" -ForegroundColor
 
 # Not: --cache-type-v turbo3, TheTom/llama-cpp-turboquant fork'una ozgudur; standart llama.cpp'de yoktur.
 # Cikti hem konsola hem logs\server.log'a yazilir (tray gizli pencerede baslattigi icin crash sebebi aksi halde kaybolur).
+# KRITIK: llama-server TUM loglarini stderr'e yazar. 2>&1 ile yakalarken ErrorActionPreference=Stop
+# bunlari sonlandirici hata (NativeCommandError) sayip sunucuyu ilk satirda oldururdu -> Continue'ya al.
+$ErrorActionPreference = 'Continue'
 & $exe.FullName `
     -m $model `
     -ngl $Ngl `
