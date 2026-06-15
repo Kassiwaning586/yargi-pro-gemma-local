@@ -30,6 +30,14 @@ Step "Visual C++ Runtime (vcredist)" {
     choco install vcredist140 -y --no-progress
     if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010) { throw "vcredist kurulamadi (exit $LASTEXITCODE)" }
 }
+Step "Saglam indirici (aria2)" {
+    # Buyuk dosyalari (model ~14 GB, binary ~750 MB) kararsiz agda saglam indirmek icin:
+    # cok-baglantili + parca parca resume. get-binary/download-model bunu kullanir.
+    choco install aria2 -y --no-progress
+    if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne 3010) { throw "aria2 kurulamadi (exit $LASTEXITCODE)" }
+    # PATH'i tazele ki ayni oturumda aria2c bulunsun.
+    $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+}
 Step "opencode (CLI + desktop + config)" { & "$root\scripts\install-opencode.ps1" }
 Step "Prebuilt binary indirme" { & "$root\scripts\get-binary.ps1" }
 Step "Model indirme" { & "$root\scripts\download-model.ps1" }

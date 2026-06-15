@@ -34,22 +34,41 @@ if ((Test-Path $target) -and ((Get-Item $target).Length -ge $expected)) {
 
 Write-Host "Indiriliyor: $file`nHedef: $target`n"
 
-# Kararsiz aglarda indirme takilabiliyor: hiz 0'a duser ama baglanti kopmaz, curl sonsuz bekler.
-# --speed-limit 1024 --speed-time 30: 30 sn boyunca <1 KB/s ise curl'u durdur (exit 28) -> resume/retry devreye girer.
-# Buyuk dosya icin: dosya TAM (>= beklenen boyut) olana kadar -C - ile tekrar tekrar dene.
-$expGB = [math]::Round($expected/1GB,2)
-$maxTries = 40
-for ($i = 1; $i -le $maxTries; $i++) {
-    curl.exe -L -C - --retry 5 --retry-delay 3 --retry-all-errors --speed-limit 1024 --speed-time 30 -o "$target" "$url"
-    $code = $LASTEXITCODE
-    if ((Test-Path $target) -and ((Get-Item $target).Length -ge $expected)) { break }
-    $curGB = if (Test-Path $target) { [math]::Round((Get-Item $target).Length/1GB,2) } else { 0 }
-    Write-Host "Indirme yarim ($curGB / $expGB GB, deneme $i/$maxTries, curl exit $code) - kaldigi yerden devam..." -ForegroundColor Yellow
-    Start-Sleep -Seconds 3
+# aria2c: kararsiz agda en saglam indirici (cok-baglantili, parca parca resume, reset'e dayanikli).
+# Yoksa kur; yine yoksa curl'e dus. curl'un sorunu: hiz 0'a dusup donabilir + reset'te
+# tum dosyayi yeniden deneyebilir; aria2 segment bazli oldugu icin reset'leri kendi onarir.
+$dir  = Split-Path -Parent $target
+$name = Split-Path -Leaf  $target
+$aria = Get-Command aria2c -ErrorAction SilentlyContinue
+if (-not $aria) {
+    Write-Host "aria2 bulunamadi, kuruluyor..." -ForegroundColor Cyan
+    choco install aria2 -y --no-progress
+    $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
+    $aria = Get-Command aria2c -ErrorAction SilentlyContinue
+}
+
+if ($aria) {
+    # -x16/-s16: 16 baglanti/segment; --continue: kaldigi yerden (curl'un indirdigi yarim dosyayi da surdurur);
+    # --max-tries=0: sinirsiz dene; --timeout/--retry-wait: takilirsa kop ve tekrar dene.
+    aria2c --continue=true --max-connection-per-server=16 --split=16 --min-split-size=1M `
+           --max-tries=0 --retry-wait=5 --timeout=60 --connect-timeout=60 `
+           --file-allocation=none --auto-file-renaming=false --allow-overwrite=true `
+           --console-log-level=warn --summary-interval=15 `
+           --dir="$dir" --out="$name" "$url"
+} else {
+    Write-Host "aria2 yok, curl ile indiriliyor (daha az saglam)..." -ForegroundColor Yellow
+    $expGB = [math]::Round($expected/1GB,2)
+    for ($i = 1; $i -le 40; $i++) {
+        curl.exe -L -C - --retry 5 --retry-delay 3 --retry-all-errors --speed-limit 1024 --speed-time 30 -o "$target" "$url"
+        if ((Test-Path $target) -and ((Get-Item $target).Length -ge $expected)) { break }
+        $curGB = if (Test-Path $target) { [math]::Round((Get-Item $target).Length/1GB,2) } else { 0 }
+        Write-Host "Indirme yarim ($curGB / $expGB GB, deneme $i/40) - kaldigi yerden devam..." -ForegroundColor Yellow
+        Start-Sleep -Seconds 3
+    }
 }
 
 if (-not ((Test-Path $target) -and ((Get-Item $target).Length -ge $expected))) {
-    throw "model indirilemedi (eksik kaldi). Ag baglantisini kontrol edip scripti/kurulumu tekrar calistirin - kaldigi yerden devam eder."
+    throw "model indirilemedi (eksik kaldi). Ag baglantisini kontrol edip kurulumu tekrar calistirin - kaldigi yerden devam eder."
 }
 $gb = [math]::Round((Get-Item $target).Length/1GB,2)
 Write-Host "`nINDIRME TAMAM -> $target ($gb GB)" -ForegroundColor Green
