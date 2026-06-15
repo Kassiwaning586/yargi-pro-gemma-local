@@ -1,10 +1,10 @@
 # llama-server'i Gemma 4 26B QAT + turbo3 KV ile baslatir.
-# Kullanim: .\start-server.ps1 [-Context 32768] [-Parallel 1] [-Ngl 99]
-# Not: benchmark (bench-prefill.ps1) sonucu: n_parallel=4 generation'i ~3x, buyuk context ~1.7x
-# yavaslatiyor. Tek kullanicili kullanimda Parallel=1 + makul context en hizlisi (~132 tok/s).
-# Daha uzun context gerekirse: -Context 131072 (gen ~77 tok/s'e duser).
+# Kullanim: .\start-server.ps1 [-Context 131072] [-Parallel 1] [-Ngl 99]
+# Not: benchmark (bench-prefill.ps1) sonucu: n_parallel=4 generation'i ~3x yavaslatiyor (gereksiz,
+# tek kullanici). --parallel 1 ile 128K context'te gen ~77 tok/s (np4'te 26.7 idi). Daha da hizli
+# istersen context'i dusur: -Context 32768 -> gen ~132 tok/s.
 param(
-    [int]$Context = 32768,
+    [int]$Context = 131072,
     [int]$Ngl = 99,
     [int]$Port = 8080,
     [int]$Parallel = 1
