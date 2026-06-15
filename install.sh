@@ -5,7 +5,7 @@
 set -euo pipefail
 
 REPO_URL="https://github.com/saidsurucu/yargi-pro-gemma-local.git"
-DEST="$HOME/yargi-pro-gemma-local"
+DEST="$HOME/GemmaYargiPro"
 
 echo "=== Yargi Pro Local - Kurulum (macOS) ==="
 

@@ -8,7 +8,7 @@ Set-ExecutionPolicy -Scope Process Bypass -Force -ErrorAction SilentlyContinue
 # === Dagitim ayarlari (kendi repo'na gore degistir) ===
 $RepoUrl    = 'https://github.com/saidsurucu/yargi-pro-gemma-local.git'
 $InstallUrl = 'https://raw.githubusercontent.com/saidsurucu/yargi-pro-gemma-local/main/install.ps1'
-$Dest       = Join-Path $env:USERPROFILE 'yargi-pro-gemma-local'
+$Dest       = Join-Path $env:USERPROFILE 'GemmaYargiPro'
 
 Write-Host "=== Yargi Pro Local - Kurulum ===" -ForegroundColor Cyan
 
@@ -37,6 +37,31 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     $env:Path = [System.Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path','User')
 }
 
+# Calisan sunucu + tray, klasor dosyalarini/CWD'sini kilitler; tasima/silme oncesi kapat.
+function Stop-YargiProcs {
+    Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force
+    foreach ($pn in 'wscript', 'powershell') {
+        Get-CimInstance Win32_Process -Filter "Name='$pn.exe'" -ErrorAction SilentlyContinue |
+            Where-Object { $_.CommandLine -like '*yargi-tray*' -and $_.ProcessId -ne $PID } |
+            ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    }
+}
+
+# --- Eski konumdan ('yargi-pro-gemma-local') yeni konuma gecis: agir dosyalar (14 GB model)
+#     tekrar inmesin diye klasor oldugu gibi tasinir; eski konum birakilmaz. ---
+$OldDest = Join-Path $env:USERPROFILE 'yargi-pro-gemma-local'
+if ((Test-Path $OldDest) -and ($OldDest -ne $Dest)) {
+    Stop-YargiProcs
+    if (-not (Test-Path $Dest)) {
+        Write-Host "[GIT] Eski konum yeni ada tasiniyor (model korunur): $OldDest -> $Dest" -ForegroundColor Cyan
+        try { Rename-Item -LiteralPath $OldDest -NewName (Split-Path -Leaf $Dest) -ErrorAction Stop }
+        catch { Write-Host "[UYARI] Eski klasor tasinamadi ($($_.Exception.Message)); temiz kurulum yapilacak." -ForegroundColor Yellow }
+    } else {
+        Write-Host "[GIT] Eski konum siliniyor (yeni konum zaten var): $OldDest" -ForegroundColor Yellow
+        Remove-Item -LiteralPath $OldDest -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 # --- Repo'yu HER ZAMAN temiz klonla. Var olan kopya silinir; ancak indirilen
 #     agir dosyalar (model + vendor binary, ikisi de .gitignore'da) korunup
 #     klon sonrasi geri tasinir; boylece kod hep taze gelir, 14 GB tekrar inmez. ---
@@ -44,8 +69,7 @@ $keep = Join-Path (Split-Path -Parent $Dest) '.yargi-keep'
 $keepSubs = @('models', 'vendor')
 
 if (Test-Path $Dest) {
-    # Calisan sunucu vendor/model dosyalarini kilitler; once kapat.
-    Get-Process llama-server -ErrorAction SilentlyContinue | Stop-Process -Force
+    Stop-YargiProcs
     New-Item -ItemType Directory -Force -Path $keep | Out-Null
     foreach ($sub in $keepSubs) {
         $src = Join-Path $Dest $sub
