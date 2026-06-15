@@ -12,7 +12,7 @@ $zip = Join-Path $env:TEMP 'llama-turboquant-win-cuda.zip'
 Write-Host "Prebuilt indiriliyor..." -ForegroundColor Cyan
 # -C - : yarim kalan indirmeden devam (743 MB'i her seferinde bastan indirme).
 # --retry-all-errors : 'connection reset' (curl 56) gibi hatalarda da tekrar dene.
-curl.exe -L -C - --retry 8 --retry-delay 5 --retry-all-errors -o "$zip" "$url"
+curl.exe -L -C - --retry 8 --retry-delay 5 --retry-all-errors --speed-limit 1024 --speed-time 30 -o "$zip" "$url"
 $code = $LASTEXITCODE
 # 33 = HTTP range error (416): dosya zaten tam inmis; hata degil, ace gec.
 if ($code -ne 0 -and $code -ne 33) { throw "binary indirilemedi (curl exit $code)" }

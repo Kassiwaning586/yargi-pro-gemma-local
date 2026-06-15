@@ -14,7 +14,7 @@ URL="https://github.com/saidsurucu/yargi-pro-gemma-local/releases/download/$REL/
 echo "Prebuilt indiriliyor ($A)..."
 # -C - : kaldigi yerden devam; --retry-all-errors : connection reset gibi hatalarda da tekrar dene.
 # curl 33 = HTTP range error (416): dosya zaten tam inmis, hata sayma.
-curl -L -C - --retry 8 --retry-delay 5 --retry-all-errors -o "$ZIP" "$URL" \
+curl -L -C - --retry 8 --retry-delay 5 --retry-all-errors --speed-limit 1024 --speed-time 30 -o "$ZIP" "$URL" \
   || { c=$?; [ "$c" -eq 33 ] || { echo "binary indirilemedi (curl $c)"; exit 1; }; }
 unzip -o "$ZIP" -d "$DEST"
 [ -f "$EXE" ] || { echo "binary acilmadi: $EXE"; exit 1; }

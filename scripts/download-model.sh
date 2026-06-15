@@ -31,11 +31,21 @@ if [ -f "$MODELS/$FILE" ] && [ "$(stat -f%z "$MODELS/$FILE" 2>/dev/null || stat 
 fi
 
 echo "Indiriliyor: $FILE (~$((EXPECTED/1024/1024/1024)) GB)"
-curl -L -C - --retry 8 --retry-delay 5 --retry-all-errors -o "$MODELS/$FILE" "$URL"
+# --speed-limit/--speed-time: 30 sn boyunca <1 KB/s ise curl'u durdur (donma) -> resume/retry devreye girsin.
+# Dosya TAM olana kadar -C - ile tekrar tekrar dene (kararsiz ag icin).
+TRIES=40
+for i in $(seq 1 $TRIES); do
+  curl -L -C - --retry 5 --retry-delay 3 --retry-all-errors --speed-limit 1024 --speed-time 30 -o "$MODELS/$FILE" "$URL" || true
+  SZ=$(stat -f%z "$MODELS/$FILE" 2>/dev/null || stat -c%s "$MODELS/$FILE" 2>/dev/null || echo 0)
+  [ "$SZ" -ge "$EXPECTED" ] && break
+  echo "Indirme yarim ($((SZ/1024/1024)) MB / $((EXPECTED/1024/1024)) MB, deneme $i/$TRIES) - kaldigi yerden devam..."
+  sleep 3
+done
 
-SZ=$(stat -f%z "$MODELS/$FILE" 2>/dev/null || stat -c%s "$MODELS/$FILE")
+SZ=$(stat -f%z "$MODELS/$FILE" 2>/dev/null || stat -c%s "$MODELS/$FILE" 2>/dev/null || echo 0)
 if [ "$SZ" -ge "$EXPECTED" ]; then
   echo "INDIRME TAMAM -> $MODELS/$FILE ($((SZ/1024/1024/1024)) GB)"
 else
-  echo "UYARI: Dosya eksik olabilir ($SZ byte). Scripti tekrar calistir (resume eder)."
+  echo "model indirilemedi (eksik kaldi). Agi kontrol edip tekrar calistirin - kaldigi yerden devam eder." >&2
+  exit 1
 fi

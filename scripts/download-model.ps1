@@ -34,17 +34,22 @@ if ((Test-Path $target) -and ((Get-Item $target).Length -ge $expected)) {
 
 Write-Host "Indiriliyor: $file`nHedef: $target`n"
 
-curl.exe -L -C - --retry 8 --retry-delay 5 --retry-all-errors -o "$target" "$url"
-if ($LASTEXITCODE -ne 0) { throw "curl indirme basarisiz (exit $LASTEXITCODE)" }
-
-if (Test-Path $target) {
-    $len = (Get-Item $target).Length
-    $gb = [math]::Round($len/1GB,2)
-    if ($len -ge $expected) {
-        Write-Host "`nINDIRME TAMAM -> $target ($gb GB)" -ForegroundColor Green
-    } else {
-        Write-Host "`nUYARI: Dosya eksik olabilir ($gb GB). Scripti tekrar calistir (resume eder)." -ForegroundColor Yellow
-    }
-} else {
-    Write-Host "`nUYARI: Dosya olusmadi: $target" -ForegroundColor Yellow
+# Kararsiz aglarda indirme takilabiliyor: hiz 0'a duser ama baglanti kopmaz, curl sonsuz bekler.
+# --speed-limit 1024 --speed-time 30: 30 sn boyunca <1 KB/s ise curl'u durdur (exit 28) -> resume/retry devreye girer.
+# Buyuk dosya icin: dosya TAM (>= beklenen boyut) olana kadar -C - ile tekrar tekrar dene.
+$expGB = [math]::Round($expected/1GB,2)
+$maxTries = 40
+for ($i = 1; $i -le $maxTries; $i++) {
+    curl.exe -L -C - --retry 5 --retry-delay 3 --retry-all-errors --speed-limit 1024 --speed-time 30 -o "$target" "$url"
+    $code = $LASTEXITCODE
+    if ((Test-Path $target) -and ((Get-Item $target).Length -ge $expected)) { break }
+    $curGB = if (Test-Path $target) { [math]::Round((Get-Item $target).Length/1GB,2) } else { 0 }
+    Write-Host "Indirme yarim ($curGB / $expGB GB, deneme $i/$maxTries, curl exit $code) - kaldigi yerden devam..." -ForegroundColor Yellow
+    Start-Sleep -Seconds 3
 }
+
+if (-not ((Test-Path $target) -and ((Get-Item $target).Length -ge $expected))) {
+    throw "model indirilemedi (eksik kaldi). Ag baglantisini kontrol edip scripti/kurulumu tekrar calistirin - kaldigi yerden devam eder."
+}
+$gb = [math]::Round((Get-Item $target).Length/1GB,2)
+Write-Host "`nINDIRME TAMAM -> $target ($gb GB)" -ForegroundColor Green
